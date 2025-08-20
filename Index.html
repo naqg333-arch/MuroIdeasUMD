@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muro de Inspiración - Currículo del Futuro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // 
+           const firebaseConfig={
+            apiKey:"AIzaSyBr8ntAdlkZLgH3MLo85Qm0v5c_WdbqaTQ",
+            authDomain:"umd-lluvia-de-ideas.firebaseapp.com",
+            projectId:"umd-lluvia-de-ideas",
+            storageBucket:"umd-lluvia-de-ideas.firebasestorage.app",
+            messagingSenderId:"34779106949",
+            appId:"1:34779106949:web:47689dbc887e73e84ea3ec"
+           };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Hacer las funciones globales
+        window.db = db;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.onSnapshot = onSnapshot;
+        window.serverTimestamp = serverTimestamp;
+        window.firebaseReady = true;
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .neural-connection {
+            stroke: #6366f1;
+            stroke-width: 2;
+            opacity: 0.6;
+            animation: pulse 3s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+        
+        .idea-node {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .idea-node:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+        }
+        
+        .floating-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .modal-backdrop {
+            backdrop-filter: blur(8px);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .neural-bg {
+            background: radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #6366f1;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen neural-bg">
+    <!-- Header -->
+    <div class="gradient-bg text-white py-8 px-6">
+        <div class="max-w-6xl mx-auto text-center">
+            <h1 class="text-4xl font-bold mb-6">🧠 Muro de Inspiración Colaborativo</h1>
+            <h2 class="text-2xl font-semibold mb-6">¿Qué debería tener el currículo ideal para transformar el futuro académico?</h2>
+            <p class="text-lg opacity-90 max-w-4xl mx-auto mb-6">
+                Puedes tener en cuenta temas como: trayectorias de aprendizaje, competencias transversales, flexibilidad curricular, multidisciplinariedad, demandas del mercado laboral, herramientas digitales, etc.
+            </p>
+            <p class="text-base font-medium">Tu opinión es clave para diseñar trayectorias que realmente inspiren y mejoren nuestra calidad académica-curricular</p>
+            
+            <!-- Estado de conexión -->
+            <div id="connectionStatus" class="mt-4 px-4 py-2 rounded-full text-sm font-medium bg-yellow-500 text-white inline-block">
+                🔄 Conectando con Firebase...
+            </div>
+        </div>
+    </div>
+
+    <!-- Neural Map Container -->
+    <div class="relative min-h-screen p-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- Add Idea Button -->
+            <div class="text-center mb-8">
+                <button id="addIdeaBtn" onclick="openModal()" disabled class="bg-gray-400 text-white px-8 py-4 rounded-full font-semibold text-lg shadow-lg transition-all duration-300 cursor-not-allowed">
+                    <div class="loading-spinner inline-block mr-2"></div>
+                    Cargando...
+                </button>
+                <p class="text-gray-600 mt-2">Haz clic en cualquier idea para ver más detalles • Las ideas se sincronizan en tiempo real</p>
+            </div>
+
+            <!-- Neural Network SVG -->
+            <svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 1;">
+                <!-- Conexiones desde el centro hacia cada idea -->
+                <line class="neural-connection" x1="50%" y1="50%" x2="20%" y2="25%"></line>
+                <line class="neural-connection" x1="50%" y1="50%" x2="75%" y2="18%"></line>
+                <line class="neural-connection" x1="50%" y1="50%" x2="22%" y2="75%"></line>
+                <line class="neural-connection" x1="50%" y1="50%" x2="78%" y2="80%"></line>
+                <line class="neural-connection" x1="50%" y1="50%" x2="85%" y2="35%"></line>
+                
+                <!-- Conexiones secundarias entre ideas relacionadas -->
+                <line class="neural-connection" x1="20%" y1="25%" x2="75%" y2="18%" style="opacity: 0.3;"></line>
+                <line class="neural-connection" x1="22%" y1="75%" x2="78%" y2="80%" style="opacity: 0.3;"></line>
+                <line class="neural-connection" x1="75%" y1="18%" x2="85%" y2="35%" style="opacity: 0.3;"></line>
+            </svg>
+
+            <!-- Ideas Container -->
+            <div id="ideasContainer" class="relative min-h-screen" style="z-index: 2;">
+                <!-- Nodo Central -->
+                <div class="central-node absolute bg-gradient-to-br from-indigo-600 to-purple-700 text-white rounded-2xl p-6 shadow-2xl border-4 border-white" style="top: 45%; left: 42%; transform: translate(-50%, -50%); width: 320px;">
+                    <h3 class="font-bold text-lg text-center">🎓 ¿Qué debería tener el currículo ideal para transformar el futuro académico?</h3>
+                </div>
+
+                <!-- Las ideas aparecerán aquí cuando los usuarios las agreguen -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para agregar ideas -->
+    <div id="addIdeaModal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop hidden items-center justify-center" style="z-index: 1000;">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">💡 Comparte tu Idea</h3>
+            
+            <form onsubmit="addIdea(event)">
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">Título de tu idea:</label>
+                    <input type="text" id="ideaTitle" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="Ej: Aprendizaje Basado en Proyectos" required>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">Descripción:</label>
+                    <textarea id="ideaDescription" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="Explica tu idea y cómo transformaría el currículo..." required></textarea>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-semibold mb-2">Tu nombre:</label>
+                    <input type="text" id="ideaAuthor" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="Tu nombre" required>
+                </div>
+                
+                <div class="flex gap-4">
+                    <button type="button" onclick="closeModal()" class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" id="submitBtn" class="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                        Agregar Idea
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para ver detalles de idea -->
+    <div id="ideaDetailModal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop hidden items-center justify-center" style="z-index: 1000;">
+        <div class="bg-white rounded-2xl p-8 max-w-lg w-full mx-4 transform transition-all duration-300 scale-95">
+            <div class="text-center mb-6">
+                <h3 id="detailTitle" class="text-2xl font-bold text-gray-800 mb-2"></h3>
+                <p id="detailAuthor" class="text-gray-600"></p>
+                <p id="detailDate" class="text-sm text-gray-500 mt-1"></p>
+            </div>
+            
+            <div class="mb-6">
+                <p id="detailDescription" class="text-gray-700 leading-relaxed"></p>
+            </div>
+            
+            <div class="text-center">
+                <button onclick="closeDetailModal()" class="px-8 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contador de ideas -->
+    <div class="fixed bottom-6 right-6 bg-white rounded-full px-6 py-3 shadow-lg border">
+        <span class="text-gray-700 font-semibold">💡 Ideas: <span id="ideaCount">0</span></span>
+    </div>
+
+    <script>
+        let ideaCount = 0;
+        let isFirebaseReady = false;
+        const colors = ['blue', 'green', 'purple', 'orange', 'red', 'pink', 'indigo', 'yellow'];
+        const positions = [
+            {top: 10, left: 10}, {top: 15, left: 70}, {top: 30, left: 5},
+            {top: 35, left: 80}, {top: 55, left: 15}, {top: 60, left: 75},
+            {top: 75, left: 10}, {top: 80, left: 65}, {top: 20, left: 85}
+        ];
+
+        // Esperar a que Firebase esté listo
+        function waitForFirebase() {
+            if (window.firebaseReady) {
+                initializeApp();
+            } else {
+                setTimeout(waitForFirebase, 100);
+            }
+        }
+
+        // Inicializar la aplicación
+        function initializeApp() {
+            try {
+                // Escuchar cambios en tiempo real
+                const ideasRef = window.collection(window.db, 'ideas');
+                window.onSnapshot(ideasRef, (snapshot) => {
+                    updateConnectionStatus('connected');
+                    enableInterface();
+                    
+                    // Limpiar ideas existentes
+                    const existingIdeas = document.querySelectorAll('.idea-node:not(.central-node)');
+                    existingIdeas.forEach(node => node.remove());
+                    
+                    ideaCount = 0;
+                    
+                    // Agregar todas las ideas
+                    snapshot.forEach((doc) => {
+                        const idea = doc.data();
+                        createIdeaNode(idea.title, idea.description, idea.author, idea.timestamp);
+                        ideaCount++;
+                    });
+                    
+                    document.getElementById('ideaCount').textContent = ideaCount;
+                }, (error) => {
+                    console.error('Error al escuchar cambios:', error);
+                    updateConnectionStatus('error');
+                });
+                
+                isFirebaseReady = true;
+            } catch (error) {
+                console.error('Error al inicializar Firebase:', error);
+                updateConnectionStatus('error');
+            }
+        }
+
+        // Actualizar estado de conexión
+        function updateConnectionStatus(status) {
+            const statusEl = document.getElementById('connectionStatus');
+            switch(status) {
+                case 'connected':
+                    statusEl.className = 'mt-4 px-4 py-2 rounded-full text-sm font-medium bg-green-500 text-white inline-block';
+                    statusEl.textContent = '✅ Conectado - Ideas sincronizadas en tiempo real';
+                    break;
+                case 'error':
+                    statusEl.className = 'mt-4 px-4 py-2 rounded-full text-sm font-medium bg-red-500 text-white inline-block';
+                    statusEl.textContent = '❌ Error de conexión - Revisa la configuración de Firebase';
+                    break;
+            }
+        }
+
+        // Habilitar interfaz
+        function enableInterface() {
+            const addBtn = document.getElementById('addIdeaBtn');
+            addBtn.disabled = false;
+            addBtn.className = 'bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105';
+            addBtn.innerHTML = '✨ Agregar Mi Idea';
+        }
+
+        // Crear nodo de idea
+        function createIdeaNode(title, description, author, timestamp) {
+            const container = document.getElementById('ideasContainer');
+            const newIdea = document.createElement('div');
+            
+            const existingIdeas = container.querySelectorAll('.idea-node:not(.central-node)');
+            const posIndex = existingIdeas.length % positions.length;
+            const randomTop = positions[posIndex].top + (Math.random() * 8 - 4);
+            const randomLeft = positions[posIndex].left + (Math.random() * 8 - 4);
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            const randomDelay = Math.random() * 5;
+            
+            newIdea.className = 'idea-node absolute bg-white rounded-xl p-5 shadow-xl border-l-4 floating-animation';
+            newIdea.style.borderLeftColor = getColorValue(randomColor);
+            newIdea.style.top = `${Math.max(5, Math.min(90, randomTop))}%`;
+            newIdea.style.left = `${Math.max(5, Math.min(85, randomLeft))}%`;
+            newIdea.style.width = '280px';
+            newIdea.style.animationDelay = `-${randomDelay}s`;
+            newIdea.style.cursor = 'pointer';
+            
+            // Formatear fecha
+            let dateStr = '';
+            if (timestamp && timestamp.toDate) {
+                const date = timestamp.toDate();
+                dateStr = date.toLocaleDateString('es-ES', { 
+                    day: 'numeric', 
+                    month: 'short', 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+            }
+            
+            newIdea.onclick = () => showIdeaDetail(title, description, author, dateStr);
+            
+            // Emoji aleatorio
+            const emojis = ['🎯', '🚀', '🔗', '🏢', '💻', '🌟', '⚡', '🎨', '🔬', '🌍'];
+            const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+            
+            const truncatedDescription = description.length > 80 ? description.substring(0, 80) + '...' : description;
+            
+            newIdea.innerHTML = `
+                <h3 class="font-bold mb-3 text-lg" style="color: ${getColorValue(randomColor)};">${randomEmoji} ${title}</h3>
+                <p class="text-gray-700 mb-3 leading-relaxed">${truncatedDescription}</p>
+                <div class="text-sm font-medium" style="color: ${getColorValue(randomColor)};">Por: ${author}</div>
+                ${dateStr ? `<div class="text-xs text-gray-500 mt-1">${dateStr}</div>` : ''}
+            `;
+            
+            container.appendChild(newIdea);
+            
+            // Animación de entrada
+            newIdea.style.opacity = '0';
+            newIdea.style.transform = 'scale(0.8)';
+            setTimeout(() => {
+                newIdea.style.transition = 'all 0.5s ease';
+                newIdea.style.opacity = '1';
+                newIdea.style.transform = 'scale(1)';
+            }, 100);
+        }
+
+        // Agregar idea a Firebase
+        async function addIdea(event) {
+            event.preventDefault();
+            
+            if (!isFirebaseReady) {
+                alert('Esperando conexión con Firebase...');
+                return;
+            }
+            
+            const title = document.getElementById('ideaTitle').value.trim();
+            const description = document.getElementById('ideaDescription').value.trim();
+            const author = document.getElementById('ideaAuthor').value.trim();
+            
+            if (!title || !description || !author) {
+                alert('Por favor completa todos los campos');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="loading-spinner inline-block mr-2"></div>Guardando...';
+            
+            try {
+                await window.addDoc(window.collection(window.db, 'ideas'), {
+                    title: title,
+                    description: description,
+                    author: author,
+                    timestamp: window.serverTimestamp()
+                });
+                
+                // Limpiar formulario y cerrar modal
+                document.getElementById('ideaTitle').value = '';
+                document.getElementById('ideaDescription').value = '';
+                document.getElementById('ideaAuthor').value = '';
+                closeModal();
+                
+                showSuccessMessage('¡Idea agregada exitosamente! 🎉');
+                
+            } catch (error) {
+                console.error('Error al agregar idea:', error);
+                alert('Error al guardar la idea. Por favor intenta de nuevo.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Agregar Idea';
+            }
+        }
+
+        function getColorValue(colorName) {
+            const colorMap = {
+                'blue': '#3b82f6', 'green': '#10b981', 'purple': '#8b5cf6', 'orange': '#f97316',
+                'red': '#ef4444', 'pink': '#ec4899', 'indigo': '#6366f1', 'yellow': '#eab308'
+            };
+            return colorMap[colorName] || '#6366f1';
+        }
+        
+        function openModal() {
+            if (!isFirebaseReady) return;
+            document.getElementById('addIdeaModal').classList.remove('hidden');
+            document.getElementById('addIdeaModal').classList.add('flex');
+            document.querySelector('#addIdeaModal .bg-white').classList.remove('scale-95');
+            document.querySelector('#addIdeaModal .bg-white').classList.add('scale-100');
+        }
+        
+        function closeModal() {
+            document.querySelector('#addIdeaModal .bg-white').classList.remove('scale-100');
+            document.querySelector('#addIdeaModal .bg-white').classList.add('scale-95');
+            setTimeout(() => {
+                document.getElementById('addIdeaModal').classList.add('hidden');
+                document.getElementById('addIdeaModal').classList.remove('flex');
+            }, 300);
+        }
+        
+        function showIdeaDetail(title, description, author, date) {
+            document.getElementById('detailTitle').textContent = title;
+            document.getElementById('detailDescription').textContent = description;
+            document.getElementById('detailAuthor').textContent = `Por: ${author}`;
+            document.getElementById('detailDate').textContent = date || '';
+            
+            document.getElementById('ideaDetailModal').classList.remove('hidden');
+            document.getElementById('ideaDetailModal').classList.add('flex');
+            document.querySelector('#ideaDetailModal .bg-white').classList.remove('scale-95');
+            document.querySelector('#ideaDetailModal .bg-white').classList.add('scale-100');
+        }
+        
+        function closeDetailModal() {
+            document.querySelector('#ideaDetailModal .bg-white').classList.remove('scale-100');
+            document.querySelector('#ideaDetailModal .bg-white').classList.add('scale-95');
+            setTimeout(() => {
+                document.getElementById('ideaDetailModal').classList.add('hidden');
+                document.getElementById('ideaDetailModal').classList.remove('flex');
+            }, 300);
+        }
+        
+        function showSuccessMessage(text = '¡Idea agregada exitosamente! 🎉') {
+            const message = document.createElement('div');
+            message.className = 'fixed top-6 right-6 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full';
+            message.style.zIndex = '1001';
+            message.textContent = text;
+            
+            document.body.appendChild(message);
+            
+            setTimeout(() => message.classList.remove('translate-x-full'), 100);
+            setTimeout(() => {
+                message.classList.add('translate-x-full');
+                setTimeout(() => document.body.removeChild(message), 300);
+            }, 3000);
+        }
+        
+        // Cerrar modales con ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+                closeDetailModal();
+            }
+        });
+        
+        // Cerrar modales haciendo clic fuera
+        document.getElementById('addIdeaModal').addEventListener('click', function(event) {
+            if (event.target === this) closeModal();
+        });
+        
+        document.getElementById('ideaDetailModal').addEventListener('click', function(event) {
+            if (event.target === this) closeDetailModal();
+        });
+
+        // Inicializar cuando la página cargue
+        document.addEventListener('DOMContentLoaded', waitForFirebase);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97231e5274719add',t:'MTc1NTcwNTc4Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
